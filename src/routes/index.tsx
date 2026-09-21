@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listPublished } from "@/lib/articles.functions";
-import { formatDate } from "@/components/ArticleCard";
+import { ArticleCard } from "@/components/ArticleCard";
 import heroImage from "@/assets/hero-letterpress.jpg";
 
 const feedQuery = queryOptions({
@@ -127,50 +127,20 @@ function Home() {
             to="/archive"
             className="hidden text-sm font-medium text-accent underline-reveal sm:block"
           >
-            View all essays
+            View all articles
           </Link>
         </div>
         {!lead ? (
           <div className="border border-dashed border-rule px-6 py-12 text-center">
-            <p className="font-display text-2xl text-ink">The first issue is being set.</p>
+            <p className="font-display text-2xl text-ink">Coming soon...</p>
             <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-              Sign in to the desk to publish the first piece for curious readers.
+              Articles from the Writeora desk will appear here soon.
             </p>
-            <Link
-              to="/auth"
-              className="mt-6 inline-block text-sm font-medium text-accent underline-reveal"
-            >
-              Sign in to the desk
-            </Link>
           </div>
         ) : (
           <div className="grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
             {[lead, ...rest.slice(0, 5)].map((article) => (
-              <article key={article.id} className="border-t border-rule pt-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-accent">
-                  {article.category}{" "}
-                  <span className="text-muted-foreground">
-                    · {formatDate(article.published_at)}
-                  </span>
-                </p>
-                <h3 className="mt-4 font-display text-2xl font-medium leading-tight text-ink sm:text-3xl">
-                  <Link
-                    to="/articles/$slug"
-                    params={{ slug: article.slug }}
-                    className="underline-reveal"
-                  >
-                    {article.title}
-                  </Link>
-                </h3>
-                {article.excerpt ? (
-                  <p className="mt-3 line-clamp-3 text-base leading-relaxed text-muted-foreground">
-                    {article.excerpt}
-                  </p>
-                ) : null}
-                <p className="mt-5 text-sm text-muted-foreground">
-                  {article.author_name} · {article.read_minutes} min read
-                </p>
-              </article>
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         )}
@@ -178,7 +148,7 @@ function Home() {
           to="/archive"
           className="mt-10 inline-block text-sm font-medium text-accent underline-reveal sm:hidden"
         >
-          View all essays
+          View all articles
         </Link>
       </section>
     </main>

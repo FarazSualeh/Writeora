@@ -25,13 +25,8 @@ export function Masthead() {
           Writeora
         </Link>
         <nav className="order-3 flex w-full items-center gap-5 overflow-x-auto text-sm text-muted-foreground md:order-none md:w-auto md:gap-8">
-          <Link
-            to="/"
-            className="underline-reveal"
-            activeProps={{ className: "text-ink" }}
-            activeOptions={{ exact: true }}
-          >
-            Essays
+          <Link to="/articles" className="underline-reveal" activeProps={{ className: "text-ink" }}>
+            Articles
           </Link>
           <Link to="/archive" className="underline-reveal" activeProps={{ className: "text-ink" }}>
             Archive

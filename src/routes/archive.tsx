@@ -47,7 +47,7 @@ function Archive() {
           <ArticleCard key={article.id} article={article} />
         ))}
         {articles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">The archive is empty for now.</p>
+          <p className="text-sm text-muted-foreground">Coming soon...</p>
         ) : null}
       </div>
     </main>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { inviteContributor } from "@/lib/access.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 type Invite = { id: string; email: string; accepted_at: string | null };
@@ -57,20 +58,26 @@ function Dashboard() {
     setMessage("");
     setError("");
     const normalizedEmail = email.trim().toLowerCase();
-    const { error: inviteError } = await supabase.from("invites").upsert(
-      {
-        email: normalizedEmail,
-        role: "author",
-        invited_by: user?.id,
-      },
-      { onConflict: "email" },
-    );
-    if (inviteError) {
-      setError(inviteError.message);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      setError("Your session has expired. Please sign in again.");
+      return;
+    }
+    try {
+      const result = await inviteContributor({
+        data: { email: normalizedEmail, redirectTo: window.location.origin, accessToken },
+      });
+      setMessage(
+        result.alreadyRegistered
+          ? `${normalizedEmail} already has an account; access was recorded.`
+          : `Invitation sent to ${normalizedEmail}.`,
+      );
+    } catch (inviteError) {
+      setError(inviteError instanceof Error ? inviteError.message : "Unable to send invitation.");
       return;
     }
     setEmail("");
-    setMessage(`${normalizedEmail} can now create an account and contribute.`);
     await loadAccess();
   }
 
@@ -139,6 +146,9 @@ function Dashboard() {
           {message}
         </p>
       ) : null}
+      <p className="mt-3 text-sm text-muted-foreground">
+        The contributor receives a Supabase invitation email and gets author access after joining.
+      </p>
       {error ? (
         <p className="mt-4 text-sm text-destructive" role="alert">
           {error}
