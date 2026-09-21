@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
@@ -52,10 +53,24 @@ function AuthPage() {
     await navigate({ to: "/" });
   }
 
+  async function signInWithGoogle() {
+    setLoading(true);
+    setError("");
+    const { error: oauthError } = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/~oauth/callback`,
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="mx-auto grid min-h-[calc(100vh-15rem)] max-w-[90rem] items-center gap-12 px-6 py-16 sm:px-8 lg:grid-cols-2 lg:gap-24 lg:px-12">
       <section>
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-accent">The Writeora desk</p>
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          The Writeora desk
+        </p>
         <h1 className="mt-5 max-w-[11ch] font-display text-5xl font-medium leading-[0.95] text-ink sm:text-7xl">
           Make space for the work.
         </h1>
@@ -108,8 +123,16 @@ function AuthPage() {
               className="mt-2 block w-full border border-rule bg-card px-4 py-3 text-base text-ink outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
-          {message ? <p className="text-sm text-accent" role="status">{message}</p> : null}
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
+          {message ? (
+            <p className="text-sm text-accent" role="status">
+              {message}
+            </p>
+          ) : null}
           <button
             type="submit"
             disabled={loading}
@@ -118,6 +141,26 @@ function AuthPage() {
             {loading ? "Working..." : mode === "sign-in" ? "Enter the desk" : "Create your account"}
           </button>
         </form>
+        {mode === "sign-in" ? (
+          <>
+            <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="h-px flex-1 bg-rule" />
+              Or
+              <span className="h-px flex-1 bg-rule" />
+            </div>
+            <button
+              type="button"
+              onClick={signInWithGoogle}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-rule bg-card px-5 py-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:cursor-wait disabled:opacity-60"
+            >
+              <span aria-hidden="true" className="font-display text-base font-semibold">
+                G
+              </span>
+              Continue with Google
+            </button>
+          </>
+        ) : null}
       </section>
     </main>
   );

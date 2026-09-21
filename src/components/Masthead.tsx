@@ -17,7 +17,7 @@ export function Masthead() {
 
   return (
     <header className="mx-auto max-w-[90rem] px-6 pt-8 sm:px-8 lg:px-12 lg:pt-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-b border-rule pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b border-rule pb-5">
         <Link
           to="/"
           className="font-display text-3xl font-semibold leading-none tracking-tight text-ink sm:text-4xl"
@@ -53,14 +53,14 @@ export function Masthead() {
           <button
             type="button"
             onClick={signOut}
-            className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline-reveal"
+            className="order-2 border border-rule px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:text-accent md:order-none"
           >
             Sign out
           </button>
         ) : (
           <Link
             to="/auth"
-            className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline-reveal"
+            className="order-2 border border-accent bg-accent px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-paper transition-transform hover:-translate-y-0.5 md:order-none"
           >
             Sign in
           </Link>

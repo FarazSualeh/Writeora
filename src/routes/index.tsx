@@ -40,8 +40,7 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Writeora",
-          description:
-            "Independent essays, reporting, and deep dives made for curious readers.",
+          description: "Independent essays, reporting, and deep dives made for curious readers.",
           url: "/",
         }),
       },
@@ -56,7 +55,7 @@ function Home() {
 
   return (
     <main>
-      <section className="mx-auto grid max-w-[90rem] gap-10 px-6 pb-16 pt-12 sm:px-8 sm:pt-16 lg:grid-cols-12 lg:gap-14 lg:px-12 lg:pb-24 lg:pt-24">
+      <section className="mx-auto grid max-w-[90rem] gap-10 px-6 pb-16 pt-10 sm:px-8 sm:pt-12 lg:grid-cols-12 lg:gap-14 lg:px-12 lg:pb-24 lg:pt-12">
         <div className="flex flex-col justify-center lg:col-span-7">
           <p className="animate-rise text-xs font-medium uppercase tracking-[0.22em] text-accent">
             A publication for the curious
@@ -65,7 +64,8 @@ function Home() {
             Ideas with room to breathe.
           </h1>
           <p className="animate-rise animation-delay-200 mt-7 max-w-[34rem] text-xl leading-relaxed text-muted-foreground sm:text-2xl">
-            Writeora is an independent home for clear thinking, good questions, and stories that stay with you.
+            Writeora is an independent home for clear thinking, good questions, and stories that
+            stay with you.
           </p>
           <div className="animate-rise animation-delay-300 mt-9 flex flex-wrap items-center gap-5">
             <Link
@@ -100,11 +100,15 @@ function Home() {
           </div>
           <div>
             <p className="font-display text-3xl text-ink">02</p>
-            <p className="mt-2 text-sm text-muted-foreground">Independent voices, no endless scroll.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Independent voices, no endless scroll.
+            </p>
           </div>
           <div>
             <p className="font-display text-3xl text-ink">03</p>
-            <p className="mt-2 text-sm text-muted-foreground">A slower, better way to read online.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A slower, better way to read online.
+            </p>
           </div>
         </div>
       </section>
@@ -112,18 +116,30 @@ function Home() {
       <section className="mx-auto max-w-[90rem] px-6 py-16 sm:px-8 lg:px-12 lg:py-24">
         <div className="mb-10 flex items-end justify-between gap-6 border-b border-rule pb-5">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">From the desk</p>
-            <h2 className="mt-3 font-display text-4xl font-medium text-ink sm:text-5xl">The latest thinking</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
+              From the desk
+            </p>
+            <h2 className="mt-3 font-display text-4xl font-medium text-ink sm:text-5xl">
+              The latest thinking
+            </h2>
           </div>
-          <Link to="/archive" className="hidden text-sm font-medium text-accent underline-reveal sm:block">
+          <Link
+            to="/archive"
+            className="hidden text-sm font-medium text-accent underline-reveal sm:block"
+          >
             View all essays
           </Link>
         </div>
         {!lead ? (
           <div className="border border-dashed border-rule px-6 py-12 text-center">
             <p className="font-display text-2xl text-ink">The first issue is being set.</p>
-            <p className="mx-auto mt-3 max-w-md text-muted-foreground">Sign in to the desk to publish the first piece for curious readers.</p>
-            <Link to="/auth" className="mt-6 inline-block text-sm font-medium text-accent underline-reveal">
+            <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+              Sign in to the desk to publish the first piece for curious readers.
+            </p>
+            <Link
+              to="/auth"
+              className="mt-6 inline-block text-sm font-medium text-accent underline-reveal"
+            >
               Sign in to the desk
             </Link>
           </div>
@@ -132,20 +148,36 @@ function Home() {
             {[lead, ...rest.slice(0, 5)].map((article) => (
               <article key={article.id} className="border-t border-rule pt-5">
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">
-                  {article.category} <span className="text-muted-foreground">· {formatDate(article.published_at)}</span>
+                  {article.category}{" "}
+                  <span className="text-muted-foreground">
+                    · {formatDate(article.published_at)}
+                  </span>
                 </p>
                 <h3 className="mt-4 font-display text-2xl font-medium leading-tight text-ink sm:text-3xl">
-                  <Link to="/articles/$slug" params={{ slug: article.slug }} className="underline-reveal">
+                  <Link
+                    to="/articles/$slug"
+                    params={{ slug: article.slug }}
+                    className="underline-reveal"
+                  >
                     {article.title}
                   </Link>
                 </h3>
-                {article.excerpt ? <p className="mt-3 line-clamp-3 text-base leading-relaxed text-muted-foreground">{article.excerpt}</p> : null}
-                <p className="mt-5 text-sm text-muted-foreground">{article.author_name} · {article.read_minutes} min read</p>
+                {article.excerpt ? (
+                  <p className="mt-3 line-clamp-3 text-base leading-relaxed text-muted-foreground">
+                    {article.excerpt}
+                  </p>
+                ) : null}
+                <p className="mt-5 text-sm text-muted-foreground">
+                  {article.author_name} · {article.read_minutes} min read
+                </p>
               </article>
             ))}
           </div>
         )}
-        <Link to="/archive" className="mt-10 inline-block text-sm font-medium text-accent underline-reveal sm:hidden">
+        <Link
+          to="/archive"
+          className="mt-10 inline-block text-sm font-medium text-accent underline-reveal sm:hidden"
+        >
           View all essays
         </Link>
       </section>
