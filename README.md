@@ -4,7 +4,7 @@ Build a modern, SEO-optimized Blog platform called Writeora, similar to Medium. 
 
 User Access Management: The main Admin should be able to invite/grant access to specific email addresses and control who can contribute to the platform. Contributors should be able to create and edit their own articles, save drafts, and submit/publish according to the permissions assigned by the Admin. The Admin should be able to revoke access at any time. Include appropriate roles such as Admin and Author/Contributor.
 
-Each article should support a headline, cover image, author's profile image, content, category, tags, and SEO metadata (title, description, slug, Open Graph image, and keywords). 
+Each article should support a headline, cover image, author's profile image, content, category, tags, and SEO metadata (title, description, slug, Open Graph image, and keywords).
 
 The homepage should display published articles with cover image, headline, author image, author name, date, category, and short excerpt, similar to Medium.
 
@@ -22,11 +22,23 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating). The app uses Vite and TanStack Start, so its local workflow is still the familiar `npm run dev`.
 
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
 npm i
 npm run dev
+```
+
+Open http://localhost:8080/ in your browser. Vite may choose another available port; use the `Local` URL printed in the terminal.
+
+The local Supabase values belong in `.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. After changing `.env`, stop and restart the dev server.
+
+Useful commands:
+
+```sh
+npm run lint       # check formatting and code quality
+npm run build      # create a production build
+npm run preview    # serve the production build locally
 ```

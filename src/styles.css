@@ -108,11 +108,42 @@
   }
 }
 
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise 0.7s ease-out both;
+}
+
+@utility animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+@utility animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+@utility animation-delay-300 {
+  animation-delay: 300ms;
+}
+
 /* Drifting paper-wash used behind the reading column */
 @utility meshground {
   background-color: var(--paper);
   background-image:
-    radial-gradient(38% 52% at 10% 8%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(
+      38% 52% at 10% 8%,
+      color-mix(in oklab, var(--accent) 16%, transparent),
+      transparent 70%
+    ),
     radial-gradient(34% 46% at 92% 14%, oklch(0.78 0.09 72 / 0.2), transparent 70%),
     radial-gradient(42% 56% at 80% 92%, oklch(0.68 0.06 125 / 0.16), transparent 70%),
     radial-gradient(40% 50% at 18% 88%, oklch(0.66 0.05 235 / 0.14), transparent 70%);
@@ -121,7 +152,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .meshground {
+  .meshground,
+  .animate-rise {
     animation: none;
   }
 }

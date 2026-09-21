@@ -17,15 +17,20 @@ export function Masthead() {
 
   return (
     <header className="mx-auto max-w-[90rem] px-6 pt-8 sm:px-8 lg:px-12 lg:pt-12">
-      <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-b border-rule pb-5">
         <Link
           to="/"
           className="font-display text-3xl font-semibold leading-none tracking-tight text-ink sm:text-4xl"
         >
           Writeora
         </Link>
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <Link to="/" className="underline-reveal" activeProps={{ className: "text-ink" }} activeOptions={{ exact: true }}>
+        <nav className="order-3 flex w-full items-center gap-5 overflow-x-auto text-sm text-muted-foreground md:order-none md:w-auto md:gap-8">
+          <Link
+            to="/"
+            className="underline-reveal"
+            activeProps={{ className: "text-ink" }}
+            activeOptions={{ exact: true }}
+          >
             Essays
           </Link>
           <Link to="/archive" className="underline-reveal" activeProps={{ className: "text-ink" }}>
@@ -35,7 +40,11 @@ export function Masthead() {
             About
           </Link>
           {isAuthor ? (
-            <Link to="/dashboard" className="underline-reveal" activeProps={{ className: "text-ink" }}>
+            <Link
+              to="/dashboard"
+              className="underline-reveal"
+              activeProps={{ className: "text-ink" }}
+            >
               Desk
             </Link>
           ) : null}
@@ -49,7 +58,10 @@ export function Masthead() {
             Sign out
           </button>
         ) : (
-          <Link to="/auth" className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline-reveal">
+          <Link
+            to="/auth"
+            className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline-reveal"
+          >
             Sign in
           </Link>
         )}

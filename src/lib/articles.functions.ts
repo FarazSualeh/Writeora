@@ -49,7 +49,10 @@ const SELECT =
 
 type Row = Record<string, unknown>;
 
-function shape(row: Row, profiles: Map<string, { display_name: string; avatar_url: string | null; bio: string | null }>): FullArticle {
+function shape(
+  row: Row,
+  profiles: Map<string, { display_name: string; avatar_url: string | null; bio: string | null }>,
+): FullArticle {
   const p = profiles.get(String(row["author_id"]));
   return {
     id: String(row["id"]),
@@ -76,9 +79,15 @@ function shape(row: Row, profiles: Map<string, { display_name: string; avatar_ur
 async function withAuthors(rows: Row[]) {
   const supabase = publicClient();
   const ids = [...new Set(rows.map((r) => String(r["author_id"])))];
-  const map = new Map<string, { display_name: string; avatar_url: string | null; bio: string | null }>();
+  const map = new Map<
+    string,
+    { display_name: string; avatar_url: string | null; bio: string | null }
+  >();
   if (ids.length) {
-    const { data } = await supabase.from("profiles").select("id, display_name, avatar_url, bio").in("id", ids);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url, bio")
+      .in("id", ids);
     for (const p of data ?? []) {
       map.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url, bio: p.bio });
     }
@@ -99,7 +108,7 @@ export const listPublished = createServerFn({ method: "GET" }).handler(async () 
 });
 
 export const getArticleBySlug = createServerFn({ method: "GET" })
-  .inputValidator((data: { slug: string }) => data)
+  .validator((data: { slug: string }) => data)
   .handler(async ({ data }) => {
     const supabase = publicClient();
     const { data: rows, error } = await supabase

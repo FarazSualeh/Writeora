@@ -15,10 +15,14 @@ export const Route = createFileRoute("/archive")({
       { title: "Archive — every piece published on Writeora" },
       {
         name: "description",
-        content: "Browse the complete Writeora archive: essays, reporting and deep dives grouped by category.",
+        content:
+          "Browse the complete Writeora archive: essays, reporting and deep dives grouped by category.",
       },
       { property: "og:title", content: "Archive — every piece published on Writeora" },
-      { property: "og:description", content: "Browse the complete Writeora archive of essays and deep dives." },
+      {
+        property: "og:description",
+        content: "Browse the complete Writeora archive of essays and deep dives.",
+      },
       { property: "og:url", content: "/archive" },
     ],
     links: [{ rel: "canonical", href: "/archive" }],

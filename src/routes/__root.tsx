@@ -76,7 +76,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Writeora — essays and deep dives, set on paper" },
       {
         name: "description",
-        content: "Writeora is a typography-first publishing platform for essays, reporting and deep dives on any subject.",
+        content:
+          "Writeora is a typography-first publishing platform for essays, reporting and deep dives on any subject.",
       },
       { property: "og:site_name", content: "Writeora" },
       { property: "og:type", content: "website" },

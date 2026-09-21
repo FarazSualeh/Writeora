@@ -12,7 +12,8 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About Writeora — a publication set like print" },
       {
         property: "og:description",
-        content: "Why Writeora borrows the courtesy of the printed page, and how contributors are invited.",
+        content:
+          "Why Writeora borrows the courtesy of the printed page, and how contributors are invited.",
       },
       { property: "og:url", content: "/about" },
     ],
@@ -34,16 +35,18 @@ function About() {
           </h1>
           <div className="prose-writeora mt-8 max-w-[68ch] border-t border-rule pt-8 text-lg leading-[1.75] text-ink/90">
             <p>
-              Writeora is a publication, not a feed. Every piece is set in a single column capped near sixty-eight
-              characters, because the eye was built for a measure it can follow without effort.
+              Writeora is a publication, not a feed. Every piece is set in a single column capped
+              near sixty-eight characters, because the eye was built for a measure it can follow
+              without effort.
             </p>
             <p>
-              Anyone can read. Writing is by invitation: the Admin grants access to a specific email address, and that
-              person can then draft, edit and publish their own work. Access can be revoked at any time.
+              Anyone can read. Writing is by invitation: the Admin grants access to a specific email
+              address, and that person can then draft, edit and publish their own work. Access can
+              be revoked at any time.
             </p>
             <p>
-              We care about how a page loads, how a link previews, and how a headline reads in a search result — because
-              all of that is part of the reading experience too.
+              We care about how a page loads, how a link previews, and how a headline reads in a
+              search result — because all of that is part of the reading experience too.
             </p>
           </div>
         </div>
