@@ -56,9 +56,7 @@ function AuthPage() {
   async function signInWithGoogle() {
     setLoading(true);
     setError("");
-    const { error: oauthError } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/~oauth/callback`,
-    });
+    const { error: oauthError } = await lovable.auth.signInWithOAuth("google");
     if (oauthError) {
       setError(oauthError.message);
       setLoading(false);
@@ -154,14 +152,35 @@ function AuthPage() {
               disabled={loading}
               className="flex w-full items-center justify-center gap-3 rounded-md border border-rule bg-card px-5 py-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:cursor-wait disabled:opacity-60"
             >
-              <span aria-hidden="true" className="font-display text-base font-semibold">
-                G
-              </span>
+              <GoogleMark />
               Continue with Google
             </button>
           </>
         ) : null}
       </section>
     </main>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg aria-hidden="true" className="size-5" viewBox="0 0 24 24">
+      <path
+        fill="#4285F4"
+        d="M21.35 12.27c0-.79-.07-1.55-.23-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.15c1.85-1.7 2.9-4.2 2.9-7.42Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 21.7c2.65 0 4.88-.88 6.5-2.38l-3.15-2.45c-.88.59-2 .94-3.35.94-2.57 0-4.75-1.74-5.53-4.07H3.22v2.53A9.82 9.82 0 0 0 12 21.7Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M6.47 13.74a5.9 5.9 0 0 1 0-3.48V7.73H3.22a9.8 9.8 0 0 0 0 8.54l3.25-2.53Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 6.19c1.44 0 2.73.5 3.75 1.49l2.81-2.81C16.87 3.3 14.65 2.3 12 2.3a9.82 9.82 0 0 0-8.78 5.43l3.25 2.53C7.25 7.93 9.43 6.19 12 6.19Z"
+      />
+    </svg>
   );
 }
