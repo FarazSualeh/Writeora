@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { getArticleBySlug } from "@/lib/articles.functions";
 import { formatDate } from "@/components/ArticleCard";
+import { recordRead } from "@/lib/reading-history";
 
 const articleQuery = (slug: string) =>
   queryOptions({
@@ -23,6 +25,17 @@ export const Route = createFileRoute("/articles/$slug")({
 function ArticlePage() {
   const { slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQuery(slug));
+
+  useEffect(() => {
+    if (!article) return;
+    recordRead({
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+      cover_image_url: article.cover_image_url,
+      author_name: article.author_name,
+    });
+  }, [article]);
 
   if (!article) {
     return (
