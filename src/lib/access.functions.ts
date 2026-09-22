@@ -34,7 +34,12 @@ export const inviteContributor = createServerFn({ method: "POST" })
     const { error: recordError } = await supabaseAdmin
       .from("invites")
       .upsert(
-        { email: normalizedEmail, role: "author", invited_by: admin.id },
+        {
+          email: normalizedEmail,
+          role: "author",
+          invited_by: admin.id,
+          accepted_at: inviteError ? new Date().toISOString() : null,
+        },
         { onConflict: "email" },
       );
     if (recordError) throw new Error(recordError.message);

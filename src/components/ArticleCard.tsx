@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { FullArticle } from "@/lib/articles.functions";
+import { SafeImage } from "@/components/SafeImage";
 
 export function formatDate(value: string | null) {
   if (!value) return "";
@@ -14,7 +15,7 @@ export function ArticleCard({ article }: { article: FullArticle }) {
   return (
     <article className="flex items-start gap-5">
       {article.cover_image_url ? (
-        <img
+        <SafeImage
           src={article.cover_image_url}
           alt=""
           loading="lazy"

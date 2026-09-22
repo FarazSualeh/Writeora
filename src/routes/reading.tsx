@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { clearReadingHistory, getReadingHistory, type ReadEntry } from "@/lib/reading-history";
 import { formatDate } from "@/components/ArticleCard";
+import { SafeImage } from "@/components/SafeImage";
 
 export const Route = createFileRoute("/reading")({
   head: () => ({
@@ -52,7 +53,7 @@ function ReadingPage() {
             {entries.map((entry) => (
               <li key={entry.slug} className="flex items-start gap-5 py-5">
                 {entry.cover_image_url ? (
-                  <img
+                  <SafeImage
                     src={entry.cover_image_url}
                     alt=""
                     loading="lazy"

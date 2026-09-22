@@ -117,7 +117,8 @@ export const getArticleBySlug = createServerFn({ method: "GET" })
       .eq("status", "published")
       .eq("slug", data.slug)
       .limit(1);
-    if (error || !rows?.length) return null;
+    if (error) throw new Error(`Unable to load article: ${error.message}`);
+    if (!rows?.length) return null;
     const [article] = await withAuthors(rows as Row[]);
     return article ?? null;
   });

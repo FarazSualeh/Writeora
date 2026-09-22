@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArticleCard } from "@/components/ArticleCard";
 import { listPublished } from "@/lib/articles.functions";
@@ -9,7 +9,6 @@ const articlesQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/articles")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(articlesQuery),
   head: () => ({
     meta: [
       { title: "Articles | Writeora" },
@@ -18,12 +17,18 @@ export const Route = createFileRoute("/articles")({
         content: "Read published articles from the Writeora desk.",
       },
     ],
-    links: [{ rel: "canonical", href: "/articles" }],
   }),
   component: Articles,
 });
 
 function Articles() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname !== "/articles") return <Outlet />;
+
+  return <ArticleIndex />;
+}
+
+function ArticleIndex() {
   const { data: articles } = useSuspenseQuery(articlesQuery);
 
   return (
