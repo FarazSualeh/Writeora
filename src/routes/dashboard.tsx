@@ -265,9 +265,9 @@ function Dashboard() {
     setActiveView("library");
   }
 
-  async function saveArticle(status: "draft" | "published") {
+  async function saveArticle(status: "draft" | "published", submittedEditor?: EditorState) {
     if (!user) return;
-    const currentEditor = editorRef.current;
+    const currentEditor = submittedEditor ?? editorRef.current;
     const title = currentEditor.title.trim();
     const slug = slugify(currentEditor.slug.trim() || title);
     if (!title) {
@@ -611,8 +611,19 @@ function Editor({
   onChange: <K extends keyof EditorState>(key: K, value: EditorState[K]) => void;
   onTitleChange: (title: string) => void;
   onSlugChange: (slug: string) => void;
-  onSave: (status: "draft" | "published") => Promise<void>;
+  onSave: (status: "draft" | "published", editor: EditorState) => Promise<void>;
 }) {
+  const titleInputRef = useRef<HTMLTextAreaElement>(null);
+  const slugInputRef = useRef<HTMLInputElement>(null);
+
+  function save(status: "draft" | "published") {
+    void onSave(status, {
+      ...editor,
+      title: titleInputRef.current?.value ?? editor.title,
+      slug: slugInputRef.current?.value ?? editor.slug,
+    });
+  }
+
   return (
     <main className="mx-auto w-full max-w-7xl px-5 py-7 sm:px-8 sm:py-10 lg:px-12">
       <header className="sticky top-0 z-20 -mx-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-rule bg-paper/95 px-5 py-3 backdrop-blur sm:-mx-8 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-8 lg:-mx-12 lg:px-12">
@@ -622,10 +633,10 @@ function Editor({
           <p className="text-xs text-muted-foreground">{editor.id ? "Editing story" : "New story"}</p>
         </div>
         <div className="col-span-2 grid grid-cols-2 gap-2 sm:col-span-1 sm:flex">
-          <Button type="button" variant="outline" disabled={saving} onClick={() => void onSave("draft")}>
+          <Button type="button" variant="outline" disabled={saving} onClick={() => save("draft")}>
             {saving ? "Saving..." : "Save draft"}
           </Button>
-          <Button type="button" disabled={saving} onClick={() => void onSave("published")}>
+          <Button type="button" disabled={saving} onClick={() => save("published")}>
             <Check /> Publish
           </Button>
         </div>
@@ -636,6 +647,7 @@ function Editor({
           <label className="sr-only" htmlFor="article-title">Headline</label>
           <Textarea
             id="article-title"
+            ref={titleInputRef}
             value={editor.title}
             onChange={(event) => onTitleChange(event.target.value)}
             placeholder="Story headline"
@@ -667,6 +679,7 @@ function Editor({
           <EditorGroup title="Story details">
             <Field label="Slug">
               <Input
+                ref={slugInputRef}
                 value={editor.slug}
                 onChange={(event) => onSlugChange(event.target.value)}
                 placeholder="story-url"
