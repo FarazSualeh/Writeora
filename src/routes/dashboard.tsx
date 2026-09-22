@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { inviteContributor } from "@/lib/access.functions";
+import { inviteContributor, revokeContributor } from "@/lib/access.functions";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
@@ -84,9 +84,11 @@ export const Route = createFileRoute("/dashboard")({
 
 function slugify(value: string) {
   return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 90);
 }
@@ -96,6 +98,17 @@ function splitList(value: string) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function optionalHttpUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "http:" || url.protocol === "https:" ? trimmed : null;
+  } catch {
+    return null;
+  }
 }
 
 function articleToEditor(article: Article): EditorState {
@@ -130,6 +143,7 @@ function Dashboard() {
   const [activeView, setActiveView] = useState<"library" | "editor">("library");
   const [editor, setEditor] = useState<EditorState>(EMPTY_EDITOR);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [editorDirty, setEditorDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published">("all");
@@ -151,6 +165,9 @@ function Dashboard() {
   }
 
   async function loadAccess() {
+    setAccessError("");
+    setInvites([]);
+    setContributors([]);
     const [{ data: inviteData, error: inviteError }, { data: roleData, error: roleError }] =
       await Promise.all([
         supabase.from("invites").select("id, email, accepted_at").order("created_at", { ascending: false }),
@@ -162,14 +179,15 @@ function Dashboard() {
     }
     setInvites((inviteData ?? []) as Invite[]);
     const ids = (roleData ?? []).map((role) => role.user_id);
-    if (!ids.length) {
-      setContributors([]);
-      return;
-    }
-    const { data: profiles } = await supabase
+    if (!ids.length) return;
+    const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("id, email, display_name")
       .in("id", ids);
+    if (profilesError) {
+      setAccessError(profilesError.message);
+      return;
+    }
     setContributors(
       (profiles ?? []).map((profile) => ({
         user_id: profile.id,
@@ -202,6 +220,7 @@ function Dashboard() {
   function newArticle() {
     setEditor(EMPTY_EDITOR);
     setSlugTouched(false);
+    setEditorDirty(false);
     setActiveView("editor");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -209,20 +228,33 @@ function Dashboard() {
   function editArticle(article: Article) {
     setEditor(articleToEditor(article));
     setSlugTouched(true);
+    setEditorDirty(false);
     setActiveView("editor");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function updateEditor<K extends keyof EditorState>(key: K, value: EditorState[K]) {
+    setEditorDirty(true);
     setEditor((current) => ({ ...current, [key]: value }));
   }
 
   function updateTitle(title: string) {
+    setEditorDirty(true);
     setEditor((current) => ({
       ...current,
       title,
       slug: slugTouched ? current.slug : slugify(title),
     }));
+  }
+
+  function updateSlug(slug: string) {
+    setSlugTouched(true);
+    updateEditor("slug", slugify(slug));
+  }
+
+  function leaveEditor() {
+    if (editorDirty && !window.confirm("Discard your unsaved changes?")) return;
+    setActiveView("library");
   }
 
   async function saveArticle(status: "draft" | "published") {
@@ -233,15 +265,41 @@ function Dashboard() {
       toast.error("Add a headline and slug before saving.");
       return;
     }
+    const coverImageUrl = optionalHttpUrl(editor.coverImageUrl);
+    const ogImageUrl = optionalHttpUrl(editor.ogImageUrl);
+    if (editor.coverImageUrl.trim() && !coverImageUrl) {
+      toast.error("Enter a valid HTTP or HTTPS cover image URL.");
+      return;
+    }
+    if (editor.ogImageUrl.trim() && !ogImageUrl) {
+      toast.error("Enter a valid HTTP or HTTPS Open Graph image URL.");
+      return;
+    }
     setSaving(true);
     const existing = editor.id ? articles.find((article) => article.id === editor.id) : undefined;
+    const duplicate = articles.some((article) => article.slug === slug && article.id !== editor.id);
+    if (duplicate) {
+      toast.error("That slug is already in use. Choose a different slug.");
+      setSaving(false);
+      return;
+    }
+    if (status === "published" && !editor.content.trim()) {
+      toast.error("Add article content before publishing.");
+      setSaving(false);
+      return;
+    }
+    if (existing?.status === "published" && existing.slug !== slug) {
+      toast.error("Published article URLs cannot be changed.");
+      setSaving(false);
+      return;
+    }
     const payload: Database["public"]["Tables"]["articles"]["Insert"] = {
       author_id: existing?.author_id ?? user.id,
       title,
       slug,
       excerpt: editor.excerpt.trim() || null,
       content: editor.content,
-      cover_image_url: editor.coverImageUrl.trim() || null,
+      cover_image_url: coverImageUrl,
       category: editor.category.trim() || "Essays",
       tags: splitList(editor.tags),
       status,
@@ -250,7 +308,7 @@ function Dashboard() {
       read_minutes: Math.max(1, Number.parseInt(editor.readMinutes, 10) || 1),
       seo_title: editor.seoTitle.trim() || null,
       seo_description: editor.seoDescription.trim() || null,
-      og_image_url: editor.ogImageUrl.trim() || null,
+      og_image_url: ogImageUrl,
       keywords: splitList(editor.keywords),
     };
 
@@ -259,13 +317,18 @@ function Dashboard() {
       : await supabase.from("articles").insert(payload).select(ARTICLE_FIELDS).single();
 
     if (result.error) {
-      toast.error(result.error.message);
+      toast.error(
+        result.error.code === "23505"
+          ? "That slug is already in use. Choose a different slug."
+          : result.error.message,
+      );
       setSaving(false);
       return;
     }
     const saved = result.data as Article;
     setEditor(articleToEditor(saved));
     setSlugTouched(true);
+    setEditorDirty(false);
     await loadArticles();
     setSaving(false);
     toast.success(status === "published" ? "Article published." : "Draft saved.");
@@ -311,14 +374,31 @@ function Dashboard() {
     }
   }
 
-  async function revokeInvite(id: string) {
-    const { error } = await supabase.from("invites").delete().eq("id", id);
-    if (error) setAccessError(error.message);
-    else {
+  async function revokeInvite(emailAddress: string) {
+    setAccessError("");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      setAccessError("Your session has expired. Please sign in again.");
+      return;
+    }
+    try {
+      await revokeContributor({ data: { email: emailAddress, accessToken } });
       toast.success("Invitation revoked.");
       await loadAccess();
+    } catch (revokeError) {
+      setAccessError(revokeError instanceof Error ? revokeError.message : "Unable to revoke access.");
     }
   }
+
+  useEffect(() => {
+    if (activeView !== "editor" || !editorDirty) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [activeView, editorDirty]);
 
   if (authLoading) {
     return <main className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12">Loading the desk...</main>;
@@ -343,10 +423,10 @@ function Dashboard() {
       <Editor
         editor={editor}
         saving={saving}
-        onBack={() => setActiveView("library")}
+        onBack={leaveEditor}
         onChange={updateEditor}
         onTitleChange={updateTitle}
-        onSlugTouch={() => setSlugTouched(true)}
+        onSlugChange={updateSlug}
         onSave={saveArticle}
       />
     );
@@ -507,7 +587,7 @@ function Editor({
   onBack,
   onChange,
   onTitleChange,
-  onSlugTouch,
+  onSlugChange,
   onSave,
 }: {
   editor: EditorState;
@@ -515,7 +595,7 @@ function Editor({
   onBack: () => void;
   onChange: <K extends keyof EditorState>(key: K, value: EditorState[K]) => void;
   onTitleChange: (title: string) => void;
-  onSlugTouch: () => void;
+  onSlugChange: (slug: string) => void;
   onSave: (status: "draft" | "published") => Promise<void>;
 }) {
   return (
@@ -571,7 +651,11 @@ function Editor({
         <aside className="space-y-8 border-t border-rule pt-8 lg:sticky lg:top-28 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
           <EditorGroup title="Story details">
             <Field label="Slug">
-              <Input value={editor.slug} onFocus={onSlugTouch} onChange={(event) => onChange("slug", slugify(event.target.value))} placeholder="story-url" />
+              <Input
+                value={editor.slug}
+                onChange={(event) => onSlugChange(event.target.value)}
+                placeholder="story-url"
+              />
             </Field>
             <Field label="Cover image URL">
               <Input type="url" value={editor.coverImageUrl} onChange={(event) => onChange("coverImageUrl", event.target.value)} placeholder="https://..." />
@@ -622,7 +706,7 @@ function AccessPanel({
   error: string;
   invites: Invite[];
   contributors: Contributor[];
-  revokeInvite: (id: string) => Promise<void>;
+  revokeInvite: (email: string) => Promise<void>;
 }) {
   return (
     <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.65fr)]">
@@ -641,7 +725,7 @@ function AccessPanel({
             {invites.length ? invites.map((item) => (
               <div key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-4">
                 <div className="min-w-0"><p className="truncate text-sm text-ink">{item.email}</p><p className="text-xs text-muted-foreground">{item.accepted_at ? "Joined" : "Pending"}</p></div>
-                <Button type="button" variant="ghost" size="sm" onClick={() => void revokeInvite(item.id)}>{item.accepted_at ? "Remove record" : "Revoke"}</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => void revokeInvite(item.email)}>{item.accepted_at ? "Remove access" : "Revoke"}</Button>
               </div>
             )) : <p className="py-5 text-sm text-muted-foreground">No invitations yet.</p>}
           </div>
