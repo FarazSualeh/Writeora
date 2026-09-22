@@ -13,12 +13,46 @@ const articleQuery = (slug: string) =>
 
 export const Route = createFileRoute("/articles/$slug")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(articleQuery(params.slug)),
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: loaderData?.seo_title ?? loaderData?.title ?? "Article | Writeora" },
-      { name: "description", content: loaderData?.seo_description ?? loaderData?.excerpt ?? "" },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const title = loaderData?.seo_title ?? loaderData?.title ?? "Article | Writeora";
+    const description = loaderData?.seo_description ?? loaderData?.excerpt ?? "";
+    const image = loaderData?.og_image_url ?? loaderData?.cover_image_url;
+    const url = loaderData ? `/articles/${encodeURIComponent(loaderData.slug)}` : "/articles";
+    const articleSchema = loaderData
+      ? JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: loaderData.title,
+          description,
+          url,
+          datePublished: loaderData.published_at,
+          dateModified: loaderData.updated_at,
+          author: { "@type": "Person", name: loaderData.author_name },
+          image: image ?? undefined,
+        }).replace(/</g, "\\u003c")
+      : null;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        ...(loaderData?.keywords.length
+          ? [{ name: "keywords", content: loaderData.keywords.join(", ") }]
+          : []),
+        { property: "og:type", content: "article" },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: url },
+        ...(image ? [{ property: "og:image", content: image }] : []),
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      ...(articleSchema ? { scripts: [{ type: "application/ld+json", children: articleSchema }] } : {}),
+    };
+  },
   component: ArticlePage,
 });
 
