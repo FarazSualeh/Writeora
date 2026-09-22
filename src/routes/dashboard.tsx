@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -142,6 +142,7 @@ function Dashboard() {
   const [articlesLoading, setArticlesLoading] = useState(true);
   const [activeView, setActiveView] = useState<"library" | "editor">("library");
   const [editor, setEditor] = useState<EditorState>(EMPTY_EDITOR);
+  const editorRef = useRef<EditorState>(EMPTY_EDITOR);
   const [slugTouched, setSlugTouched] = useState(false);
   const [editorDirty, setEditorDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -218,6 +219,7 @@ function Dashboard() {
   const publishedCount = articles.filter((article) => article.status === "published").length;
 
   function newArticle() {
+    editorRef.current = EMPTY_EDITOR;
     setEditor(EMPTY_EDITOR);
     setSlugTouched(false);
     setEditorDirty(false);
@@ -226,7 +228,9 @@ function Dashboard() {
   }
 
   function editArticle(article: Article) {
-    setEditor(articleToEditor(article));
+    const nextEditor = articleToEditor(article);
+    editorRef.current = nextEditor;
+    setEditor(nextEditor);
     setSlugTouched(true);
     setEditorDirty(false);
     setActiveView("editor");
@@ -235,16 +239,20 @@ function Dashboard() {
 
   function updateEditor<K extends keyof EditorState>(key: K, value: EditorState[K]) {
     setEditorDirty(true);
-    setEditor((current) => ({ ...current, [key]: value }));
+    const nextEditor = { ...editorRef.current, [key]: value };
+    editorRef.current = nextEditor;
+    setEditor(nextEditor);
   }
 
   function updateTitle(title: string) {
     setEditorDirty(true);
-    setEditor((current) => ({
-      ...current,
+    const nextEditor = {
+      ...editorRef.current,
       title,
-      slug: slugTouched ? current.slug : slugify(title),
-    }));
+      slug: slugTouched ? editorRef.current.slug : slugify(title),
+    };
+    editorRef.current = nextEditor;
+    setEditor(nextEditor);
   }
 
   function updateSlug(slug: string) {
@@ -259,31 +267,36 @@ function Dashboard() {
 
   async function saveArticle(status: "draft" | "published") {
     if (!user) return;
-    const title = editor.title.trim();
-    const slug = slugify(editor.slug || editor.title);
-    if (!title || !slug) {
-      toast.error("Add a headline and slug before saving.");
+    const currentEditor = editorRef.current;
+    const title = currentEditor.title.trim();
+    const slug = slugify(currentEditor.slug.trim() || title);
+    if (!title) {
+      toast.error("Add a headline before saving.");
       return;
     }
-    const coverImageUrl = optionalHttpUrl(editor.coverImageUrl);
-    const ogImageUrl = optionalHttpUrl(editor.ogImageUrl);
-    if (editor.coverImageUrl.trim() && !coverImageUrl) {
+    if (!slug) {
+      toast.error("Add a usable slug before saving.");
+      return;
+    }
+    const coverImageUrl = optionalHttpUrl(currentEditor.coverImageUrl);
+    const ogImageUrl = optionalHttpUrl(currentEditor.ogImageUrl);
+    if (currentEditor.coverImageUrl.trim() && !coverImageUrl) {
       toast.error("Enter a valid HTTP or HTTPS cover image URL.");
       return;
     }
-    if (editor.ogImageUrl.trim() && !ogImageUrl) {
+    if (currentEditor.ogImageUrl.trim() && !ogImageUrl) {
       toast.error("Enter a valid HTTP or HTTPS Open Graph image URL.");
       return;
     }
     setSaving(true);
-    const existing = editor.id ? articles.find((article) => article.id === editor.id) : undefined;
-    const duplicate = articles.some((article) => article.slug === slug && article.id !== editor.id);
+    const existing = currentEditor.id ? articles.find((article) => article.id === currentEditor.id) : undefined;
+    const duplicate = articles.some((article) => article.slug === slug && article.id !== currentEditor.id);
     if (duplicate) {
       toast.error("That slug is already in use. Choose a different slug.");
       setSaving(false);
       return;
     }
-    if (status === "published" && !editor.content.trim()) {
+    if (status === "published" && !currentEditor.content.trim()) {
       toast.error("Add article content before publishing.");
       setSaving(false);
       return;
@@ -297,23 +310,23 @@ function Dashboard() {
       author_id: existing?.author_id ?? user.id,
       title,
       slug,
-      excerpt: editor.excerpt.trim() || null,
-      content: editor.content,
+      excerpt: currentEditor.excerpt.trim() || null,
+      content: currentEditor.content,
       cover_image_url: coverImageUrl,
-      category: editor.category.trim() || "Essays",
-      tags: splitList(editor.tags),
+      category: currentEditor.category.trim() || "Essays",
+      tags: splitList(currentEditor.tags),
       status,
       published_at:
         status === "published" ? existing?.published_at ?? new Date().toISOString() : null,
-      read_minutes: Math.max(1, Number.parseInt(editor.readMinutes, 10) || 1),
-      seo_title: editor.seoTitle.trim() || null,
-      seo_description: editor.seoDescription.trim() || null,
+      read_minutes: Math.max(1, Number.parseInt(currentEditor.readMinutes, 10) || 1),
+      seo_title: currentEditor.seoTitle.trim() || null,
+      seo_description: currentEditor.seoDescription.trim() || null,
       og_image_url: ogImageUrl,
-      keywords: splitList(editor.keywords),
+      keywords: splitList(currentEditor.keywords),
     };
 
-    const result = editor.id
-      ? await supabase.from("articles").update(payload).eq("id", editor.id).select(ARTICLE_FIELDS).single()
+    const result = currentEditor.id
+      ? await supabase.from("articles").update(payload).eq("id", currentEditor.id).select(ARTICLE_FIELDS).single()
       : await supabase.from("articles").insert(payload).select(ARTICLE_FIELDS).single();
 
     if (result.error) {
@@ -326,7 +339,9 @@ function Dashboard() {
       return;
     }
     const saved = result.data as Article;
-    setEditor(articleToEditor(saved));
+    const savedEditor = articleToEditor(saved);
+    editorRef.current = savedEditor;
+    setEditor(savedEditor);
     setSlugTouched(true);
     setEditorDirty(false);
     await loadArticles();
