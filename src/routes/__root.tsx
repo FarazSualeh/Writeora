@@ -100,6 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Writeora",
+          url: "https://writeora.lovable.app/",
           description: "A typography-first publishing platform for essays and deep dives.",
         }),
       },

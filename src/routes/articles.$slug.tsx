@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -89,10 +90,16 @@ function ArticlePage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12 sm:px-8 lg:px-12 lg:py-20">
+      <Link
+        to="/articles"
+        className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground underline-reveal"
+      >
+        <ArrowLeft className="size-4" /> Back to articles
+      </Link>
       {article.cover_image_url ? (
         <SafeImage
           src={article.cover_image_url}
-          alt=""
+          alt={`Cover image for ${article.title}`}
           className="mb-10 aspect-[16/8] w-full rounded-sm object-cover"
         />
       ) : null}

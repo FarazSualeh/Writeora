@@ -22,8 +22,8 @@ export function Masthead() {
   }
 
   return (
-    <header className="mx-auto max-w-[90rem] px-6 pt-8 sm:px-8 lg:px-12 lg:pt-12">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b border-rule pb-5">
+    <header className="mx-auto max-w-[90rem] px-6 pt-5 sm:px-8 lg:px-12 lg:pt-7">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 border-b border-rule pb-5">
         <Link
           to="/"
           className="font-display text-3xl font-semibold leading-none tracking-tight text-ink sm:text-4xl"
@@ -31,6 +31,9 @@ export function Masthead() {
           Writeora
         </Link>
         <nav className="order-3 flex w-full items-center gap-5 overflow-x-auto text-sm text-muted-foreground md:order-none md:w-auto md:gap-8">
+          <Link to="/" className="underline-reveal" activeProps={{ className: "text-ink" }}>
+            Home
+          </Link>
           <Link to="/articles" className="underline-reveal" activeProps={{ className: "text-ink" }}>
             Articles
           </Link>

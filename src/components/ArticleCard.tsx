@@ -17,7 +17,7 @@ export function ArticleCard({ article }: { article: FullArticle }) {
       {article.cover_image_url ? (
         <SafeImage
           src={article.cover_image_url}
-          alt=""
+          alt={`Cover image for ${article.title}`}
           loading="lazy"
           className="size-24 shrink-0 rounded-md object-cover outline-1 -outline-offset-1 outline-black/5"
         />

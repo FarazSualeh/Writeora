@@ -15,6 +15,7 @@ import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LiteraryEssaysRouteImport } from './routes/literary-essays'
 import { Route as ReadingRouteImport } from './routes/reading'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
@@ -48,6 +49,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LiteraryEssaysRoute = LiteraryEssaysRouteImport.update({
+  id: '/literary-essays',
+  path: '/literary-essays',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReadingRoute = ReadingRouteImport.update({
   id: '/reading',
   path: '/reading',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/articles': typeof ArticlesRouteWithChildren
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/literary-essays': typeof LiteraryEssaysRoute
   '/reading': typeof ReadingRoute
   '/articles/$slug': typeof ArticlesSlugRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/articles': typeof ArticlesRouteWithChildren
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/literary-essays': typeof LiteraryEssaysRoute
   '/reading': typeof ReadingRoute
   '/articles/$slug': typeof ArticlesSlugRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/articles': typeof ArticlesRouteWithChildren
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/literary-essays': typeof LiteraryEssaysRoute
   '/reading': typeof ReadingRoute
   '/articles/$slug': typeof ArticlesSlugRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/auth'
     | '/dashboard'
+    | '/literary-essays'
     | '/reading'
     | '/articles/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/auth'
     | '/dashboard'
+    | '/literary-essays'
     | '/reading'
     | '/articles/$slug'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/auth'
     | '/dashboard'
+    | '/literary-essays'
     | '/reading'
     | '/articles/$slug'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ArticlesRoute: typeof ArticlesRouteWithChildren
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
+  LiteraryEssaysRoute: typeof LiteraryEssaysRoute
   ReadingRoute: typeof ReadingRoute
 }
 
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/literary-essays': {
+      id: '/literary-essays'
+      path: '/literary-essays'
+      fullPath: '/literary-essays'
+      preLoaderRoute: typeof LiteraryEssaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reading': {
       id: '/reading'
       path: '/reading'
@@ -213,6 +233,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArticlesRoute: ArticlesRouteWithChildren,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
+  LiteraryEssaysRoute: LiteraryEssaysRoute,
   ReadingRoute: ReadingRoute,
 }
 export const routeTree = rootRouteImport

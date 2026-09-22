@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
           "@type": "WebSite",
           name: "Writeora",
           description: "Independent essays, reporting, and deep dives made for curious readers.",
-          url: "/",
+          url: "https://writeora.lovable.app/",
         }),
       },
     ],

@@ -55,7 +55,7 @@ function ReadingPage() {
                 {entry.cover_image_url ? (
                   <SafeImage
                     src={entry.cover_image_url}
-                    alt=""
+                    alt={`Cover image for ${entry.title}`}
                     loading="lazy"
                     className="size-20 shrink-0 rounded-md object-cover outline-1 -outline-offset-1 outline-black/5"
                   />
