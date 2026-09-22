@@ -8,6 +8,12 @@ export function Masthead() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const meta = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
+  const displayName =
+    meta["full_name"] || meta["name"] || user?.email?.split("@")[0] || "Reader";
+  const avatarUrl = meta["avatar_url"] || meta["picture"] || null;
+  const initial = displayName.charAt(0).toUpperCase();
+
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -43,15 +49,39 @@ export function Masthead() {
               Desk
             </Link>
           ) : null}
+          {user && !isAuthor ? (
+            <Link
+              to="/reading"
+              className="whitespace-nowrap underline-reveal"
+              activeProps={{ className: "text-ink" }}
+            >
+              Last read
+            </Link>
+          ) : null}
         </nav>
         {user ? (
-          <button
-            type="button"
-            onClick={signOut}
-            className="order-2 border border-rule px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:text-accent md:order-none"
-          >
-            Sign out
-          </button>
+          <div className="order-2 flex items-center gap-3 md:order-none">
+            <span className="hidden text-sm text-ink sm:inline">{displayName}</span>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                referrerPolicy="no-referrer"
+                className="size-9 rounded-full object-cover outline-1 -outline-offset-1 outline-black/10"
+              />
+            ) : (
+              <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-sm font-medium text-ink">
+                {initial}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={signOut}
+              className="border border-rule px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:text-accent"
+            >
+              Sign out
+            </button>
+          </div>
         ) : (
           <Link
             to="/auth"

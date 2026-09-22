@@ -26,6 +26,17 @@ function ArticlePage() {
   const { slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQuery(slug));
 
+  useEffect(() => {
+    if (!article) return;
+    recordRead({
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+      cover_image_url: article.cover_image_url,
+      author_name: article.author_name,
+    });
+  }, [article]);
+
   if (!article) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-20 sm:px-8 lg:px-12">
