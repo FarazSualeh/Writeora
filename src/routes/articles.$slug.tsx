@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { getArticleBySlug } from "@/lib/articles.functions";
 import { formatDate } from "@/components/ArticleCard";
+import { recordRead } from "@/lib/reading-history";
 
 const articleQuery = (slug: string) =>
   queryOptions({
